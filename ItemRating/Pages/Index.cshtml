@@ -1,0 +1,97 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+<h3><font color="lime"> @Model.Message</font></h3>
+<br />
+
+<style type="text/css">
+    #left {
+        width: 500px;
+        float: left;
+        background-color: #ffedcc;
+        padding: 10px;
+    }
+
+    #right {
+        width: 500px;
+        float: left;
+        margin-left: 35px;
+        background-color: #e5eeff;
+        padding: 10px;
+    }
+
+    #item_right {
+        margin-left: 20px;
+    }
+</style>
+
+<form method="post">
+    <div id="left">
+        <h3>Admin Testing</h3>   <br />
+        <h4>Session state:</h4>
+        @*Highlighting conditional code for HTML rendering.*@
+        @if (HttpContext.Session.GetString("id") == null)
+        {
+            <span>Not logged in</span>
+        }
+        else
+        {
+            <span>Logged in as id @HttpContext.Session.GetString("id") </span>
+        }
+
+        <br />
+
+        Users: @Html.DropDownListFor(a => a.UserDDSelected, Model.UserDD)
+        @*Notice how the PAGE HANDLER and ROUTe match the code behind function stub?*@
+        <button type="submit" asp-page-handler="SetUserLogIn" asp-route-ID_ITEM="@Model.DisplayItem.ID">Log In</button>
+        &nbsp;
+        <button type="submit" asp-page-handler="ClearLogin">Clear</button>
+
+        <hr />
+
+
+        <div><h4>Add Item</h4></div>
+        Item name: @Html.TextBoxFor(a => a.NewItemName)
+        <br />
+        <input type="submit" value="Add" asp-page-handler="AddItem" />
+        <hr />
+
+    </div>
+    <div id="right">
+        <h3>Item Testing</h3><br />
+        <h4>Navigation</h4> <br />
+        @*If no 'previous' id is found then disable the button.. same for 'next'.*@
+        <input type="submit" value="Previous" asp-page-handler="PreviousItem" asp-route-ID_ITEM="@Model.DisplayItem.PREVIOUS" disabled="@(Model.DisplayItem.PREVIOUS == 0 ? "disabled" : null)" />
+        &nbsp; <input type="submit" value="Next" asp-page-handler="NextItem" asp-route-ID_ITEM="@Model.DisplayItem.NEXT" disabled="@(Model.DisplayItem.NEXT == 0 ? "disabled" : null)" />
+
+        <hr />
+        <h4><u>Item</u></h4>
+        <div id="item_right">
+            <h4>@Model.DisplayItem.TITLE</h4>
+            <span>ID: @Model.DisplayItem.ID</span> <br />
+            <span>Rating: @Model.DisplayItem.RATING</span><br />
+
+            @Html.DropDownListFor(a => a.ITEM_RATINGSelected.RATING, Model.ratingValues, "--Select a Value--")
+            <br />
+            <input type="submit" value="Update" asp-page-handler="UpdateRating" asp-route-ID_ITEM="@Model.DisplayItem.ID" disabled="@(HttpContext.Session.GetString("id") == null ? "disabled" : null)" />
+
+            <br />
+            <br />
+            <span style="font-style:italic;text-decoration:underline;">History:</span><br />
+            @*show past ratings from all users for this given item id.*@
+            @foreach (var temp in Model.RatingsList)
+            {
+                <span style="font-style:italic;">@temp.DATE_ENTERED.ToShortDateString() - @temp.USER_NAME - @temp.RATING</span><br />
+            }
+        </div>
+    </div>
+</form>
+
+<div style="clear:both;"></div>
+
